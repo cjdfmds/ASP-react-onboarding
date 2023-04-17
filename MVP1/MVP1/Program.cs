@@ -1,10 +1,19 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using MVP1.Models;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
 builder.Services.AddControllersWithViews();
+builder.Services.AddDbContext<MystoreContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("MyStore")));
 
 var app = builder.Build();
+
+
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -20,8 +29,7 @@ app.UseRouting();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller}/{action=Index}/{id?}");
-
+    pattern: "{controller=Home}/{action=Index}/{id?}");
 app.MapFallbackToFile("index.html"); ;
 
 app.Run();
