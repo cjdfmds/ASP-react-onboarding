@@ -1,13 +1,13 @@
-import { Route } from 'react-router-dom';
+import React, { Component } from 'react';
+import { Button } from 'semantic-ui-react';
 
-const Customer = () => {
-  return (
-    <div>
-      {/* other routes */}
-      <Route path="/customers" component={Customer} />
-    </div>
-  );
+export class Customer extends Component {
+  render() {
+    return (
+      <div>
+        <h1>Customer</h1>
+        <Button color="blue">Blue Button</Button>
+      </div>
+    );
+  }
 }
-
-export default Customer;
-export { Customer };
