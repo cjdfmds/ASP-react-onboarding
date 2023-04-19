@@ -1,0 +1,11 @@
+{
+  "name": "mvp-1",
+  "version": "1.0.0",
+  "description": "npm package",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "author": "",
+  "license": "ISC"
+}
