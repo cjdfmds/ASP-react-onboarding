@@ -6,10 +6,11 @@ using MVP1.Models;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
+builder.Services.AddCors();
 builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<MystoreContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("MyStore")));
+
 
 var app = builder.Build();
 
@@ -22,14 +23,31 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+// Configure the HTTP request pipeline.
+app.UseCors(builder => builder
+    .AllowAnyHeader()
+    .AllowAnyMethod()
+    .AllowCredentials()
+    .WithOrigins("http://localhost:3000"));
+
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
+app.UseDeveloperExceptionPage();
 
 
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
-app.MapFallbackToFile("index.html"); ;
+//app.MapControllerRoute(
+//    name: "default",
+//    pattern: "{controller=Home}/{action=Index}/{id?}");
+//   app.MapFallbackToFile("index.html"); ;
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllers();
+    endpoints.MapControllerRoute(
+        name: "default",
+        pattern: "{controller=Home}/{action=Index}/{id?}");
+    app.MapFallbackToFile("index.html"); ;
+});
+
 
 app.Run();

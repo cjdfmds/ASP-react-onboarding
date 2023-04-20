@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -9,6 +10,9 @@ using MVP1.Models;
 
 namespace MVP1.Controllers
 {
+    [EnableCors("AllowAllOrigins")]
+    [ApiController]
+    [Route("api/customers")]   
     public class CustomersController : Controller
     {
         private readonly MystoreContext _context;
@@ -19,14 +23,15 @@ namespace MVP1.Controllers
         }
 
         // GET: Customers
+        [HttpGet]
         public async Task<IActionResult> Index()
         {
-              return _context.Customers != null ? 
-                          View(await _context.Customers.ToListAsync()) :
-                          Problem("Entity set 'MystoreContext.Customers'  is null.");
+            var customers = await _context.Customers.ToListAsync();
+            return Ok(customers);
         }
 
         // GET: Customers/Details/5
+        [HttpGet("{id}")]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null || _context.Customers == null)
@@ -45,6 +50,7 @@ namespace MVP1.Controllers
         }
 
         // GET: Customers/Create
+        [HttpPost]
         public IActionResult Create()
         {
             return View();
@@ -66,7 +72,7 @@ namespace MVP1.Controllers
             return View(customer);
         }
 
-        // GET: Customers/Edit/5
+        [HttpPut("{id}")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null || _context.Customers == null)
@@ -118,6 +124,7 @@ namespace MVP1.Controllers
         }
 
         // GET: Customers/Delete/5
+        [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null || _context.Customers == null)

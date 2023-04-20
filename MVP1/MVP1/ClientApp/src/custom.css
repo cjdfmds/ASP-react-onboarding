@@ -17,3 +17,27 @@ code {
   background-color: #1b6ec2;
   border-color: #1861ac;
 }
+
+.custom-thead {
+  border: 1px solid #000000;
+  border-width: 0 0 2px 0;
+}
+
+.ui.table thead th {
+  border-bottom-color: #000;
+}
+
+.centered-modal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal {
+  width: 400px;
+  height: 400px;
+  background-color: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.26);
+  border-radius: 12px;
+  padding: 0px;
+}
