@@ -30,6 +30,8 @@ namespace MVP1.Controllers
             return Ok(customers);
         }
 
+
+
         // GET: Customers/Details/5
         [HttpGet("{id}")]
         public async Task<IActionResult> Details(int? id)

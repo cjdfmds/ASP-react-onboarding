@@ -1,9 +1,14 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using MVP1.Models;
 
 var builder = WebApplication.CreateBuilder(args);
+
+//configure logging
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
 
 // Add services to the container.
 builder.Services.AddCors();
@@ -16,6 +21,7 @@ var app = builder.Build();
 
 
 
+
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
@@ -23,16 +29,17 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-// Configure the HTTP request pipeline.
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+app.UseRouting();
+
+// add UseCors middleware here
 app.UseCors(builder => builder
     .AllowAnyHeader()
     .AllowAnyMethod()
     .AllowCredentials()
     .WithOrigins("http://localhost:3000"));
 
-app.UseHttpsRedirection();
-app.UseStaticFiles();
-app.UseRouting();
 app.UseDeveloperExceptionPage();
 
 
@@ -46,7 +53,9 @@ app.UseEndpoints(endpoints =>
     endpoints.MapControllerRoute(
         name: "default",
         pattern: "{controller=Home}/{action=Index}/{id?}");
-    app.MapFallbackToFile("index.html"); ;
+    endpoints.MapControllerRoute(
+        name: "api",
+        pattern: "api/{controller}/{action}/{id?}");
 });
 
 
