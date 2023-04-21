@@ -29,18 +29,23 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+
+
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 
-// add UseCors middleware here
+
+// Add the UseCors middleware here, between UseRouting and UseEndpoints.
 app.UseCors(builder => builder
+    .AllowAnyOrigin()
     .AllowAnyHeader()
-    .AllowAnyMethod()
-    .AllowCredentials()
-    .WithOrigins("http://localhost:3000"));
+    .AllowAnyMethod());
 
 app.UseDeveloperExceptionPage();
+//To get more information about the error
+
+
 
 
 //app.MapControllerRoute(

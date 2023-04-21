@@ -17,16 +17,18 @@ export default class Customer extends Component {
     this.handleCreate = this.handleCreate.bind(this);
     this.handleCancel = this.handleCancel.bind(this);
     this.loadCustomers = this.loadCustomers.bind(this);
+
   }
 
   componentDidMount() {
+   
     // Load customers from backend API on component mount
     this.loadCustomers();
   }
 
   loadCustomers() {
     // Make HTTP GET request to backend API to get all customers
-    axios.get('/api/customers')
+    axios.get('https://localhost:7236/api/customers')
       .then(response => {
         const customers = response.data;
         this.setState({ customers: customers });
@@ -50,7 +52,7 @@ export default class Customer extends Component {
     const { name, address } = this.state;
 
     // Make HTTP POST request to backend API to add new customer
-    axios.post('/api/customers', {
+    axios.post('https://localhost:7236/api/customers', {
       name: name,
       address: address
     })

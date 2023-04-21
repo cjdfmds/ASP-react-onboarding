@@ -26,6 +26,8 @@ namespace MVP1.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
+            Response.Headers.Add("Access-Control-Allow-Origin", "*");
+
             var customers = await _context.Customers.ToListAsync();
             return Ok(customers);
         }
