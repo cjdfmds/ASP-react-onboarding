@@ -33,9 +33,11 @@ export default class Customer extends Component {
         const customers = response.data;
         this.setState({ customers: customers });
       })
+      
       .catch(error => {
         console.log(error);
         // displays error
+        
       });
   }
   
@@ -50,11 +52,11 @@ export default class Customer extends Component {
 
   handleCreate() {
     const { name, address } = this.state;
-
+  
     // Make HTTP POST request to backend API to add new customer
     axios.post('https://localhost:7236/api/customers', {
-      name: name,
-      address: address
+      Name: name,
+      Address: address
     })
       .then(response => {
         // Close modal
@@ -64,10 +66,12 @@ export default class Customer extends Component {
       })
       .catch(error => {
         console.log(error);
-        // displays error
+        const errorMessage = error.response && error.response.data && error.response.data.message ?
+          error.response.data.message :
+          'An error occurred while adding the new customer.';
+        this.setState({ error: errorMessage });
       });
   }
-
   handleCancel() {
     this.setState({ showModal: false });
   }
@@ -89,16 +93,14 @@ export default class Customer extends Component {
           <thead className="custom-thead bold">
             <tr>
               <th>Name</th>
-              <th>Age</th>
-              <th>Job</th>
+              <th>Address</th>              
             </tr>
           </thead>
           <tbody>
             {customers.map(customer => (
               <tr key={customer.id}>
                 <td data-label="Name">{customer.name}</td>
-                <td data-label="Age">{customer.age}</td>
-                <td data-label="Job">{customer.job}</td>
+                <td data-label="Address">{customer.address}</td>                
               </tr>
             ))}
           </tbody>

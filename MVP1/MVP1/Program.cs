@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Cors;
 using MVP1.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -33,8 +34,6 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-app.UseRouting();
-
 
 // Add the UseCors middleware here, between UseRouting and UseEndpoints.
 app.UseCors(builder => builder
@@ -42,26 +41,31 @@ app.UseCors(builder => builder
     .AllowAnyHeader()
     .AllowAnyMethod());
 
+app.UseRouting();
+
+
+
+
 app.UseDeveloperExceptionPage();
 //To get more information about the error
 
 
 
 
-//app.MapControllerRoute(
-//    name: "default",
-//    pattern: "{controller=Home}/{action=Index}/{id?}");
-//   app.MapFallbackToFile("index.html"); ;
-app.UseEndpoints(endpoints =>
-{
-    endpoints.MapControllers();
-    endpoints.MapControllerRoute(
-        name: "default",
-        pattern: "{controller=Home}/{action=Index}/{id?}");
-    endpoints.MapControllerRoute(
-        name: "api",
-        pattern: "api/{controller}/{action}/{id?}");
-});
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}");
+   app.MapFallbackToFile("index.html"); ;
+//app.UseEndpoints(endpoints =>
+//{
+//    endpoints.MapControllers();
+//    endpoints.MapControllerRoute(
+//        name: "default",
+//        pattern: "{controller=Home}/{action=Index}/{id?}");
+//    endpoints.MapControllerRoute(
+//        name: "api",
+//        pattern: "api/{controller}/{action}/{id?}");
+//});
 
 
 app.Run();
