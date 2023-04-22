@@ -11,9 +11,9 @@ namespace MVP1.Controllers
 {
     public class SalesController : Controller
     {
-        private readonly MystoreContext _context;
+        private readonly MyStoreContext _context;
 
-        public SalesController(MystoreContext context)
+        public SalesController(MyStoreContext context)
         {
             _context = context;
         }

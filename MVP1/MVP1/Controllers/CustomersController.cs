@@ -21,9 +21,9 @@ namespace MVP1.Controllers
             context.HttpContext.Response.Headers.Add("Access-Control-Allow-Origin", "https://localhost:44465");
             base.OnActionExecuting(context);
         }
-        private readonly MystoreContext _context;
+        private readonly MyStoreContext _context;
 
-        public CustomersController(MystoreContext context)
+        public CustomersController(MyStoreContext context)
         {
             _context = context;
            

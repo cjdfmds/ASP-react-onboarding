@@ -14,7 +14,7 @@ builder.Logging.AddConsole();
 // Add services to the container.
 builder.Services.AddCors();
 builder.Services.AddControllersWithViews();
-builder.Services.AddDbContext<MystoreContext>(options =>
+builder.Services.AddDbContext<MyStoreContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("MyStore")));
 
 

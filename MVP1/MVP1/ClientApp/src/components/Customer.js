@@ -10,18 +10,26 @@ export default class Customer extends Component {
       showModal: false,
       name: '',
       address: '',
-      customers: []
+      customers: [],
+      isDeleteModalVisible: false,
+      customerIdToDelete: null,
     };
     this.handleNameChange = this.handleNameChange.bind(this);
     this.handleAddressChange = this.handleAddressChange.bind(this);
     this.handleCreate = this.handleCreate.bind(this);
     this.handleCancel = this.handleCancel.bind(this);
     this.loadCustomers = this.loadCustomers.bind(this);
+    this.handleEdit = this.handleEdit.bind(this);
+
+    this.handleDelete = this.handleDelete.bind(this);
+    this.handleShowDeleteModal = this.handleShowDeleteModal.bind(this);
+    this.handleHideDeleteModal = this.handleHideDeleteModal.bind(this);
+    this.handleConfirmDelete = this.handleConfirmDelete.bind(this);
 
   }
 
   componentDidMount() {
-   
+
     // Load customers from backend API on component mount
     this.loadCustomers();
   }
@@ -33,14 +41,50 @@ export default class Customer extends Component {
         const customers = response.data;
         this.setState({ customers: customers });
       })
-      
+
       .catch(error => {
         console.log(error);
         // displays error
-        
+
       });
   }
-  
+
+  handleEdit(customerId) {
+    // Navigate to edit customer page with the provided ID
+    this.props.history.push(`/edit/${customerId}`);
+  }
+
+  handleDelete(customerId) {
+    this.handleShowDeleteModal(customerId);
+  }
+
+  handleShowDeleteModal(customerId) {
+    this.setState({
+      isDeleteModalVisible: true,
+      customerIdToDelete: customerId,
+    });
+  }
+
+  handleHideDeleteModal() {
+    this.setState({
+      isDeleteModalVisible: false,
+      customerIdToDelete: null,
+    });
+  }
+
+  handleConfirmDelete() {
+    const { customerIdToDelete } = this.state;
+    axios
+      .delete(`https://localhost:7236/api/customers/${customerIdToDelete}`)
+      .then((response) => {
+        this.handleHideDeleteModal();
+        this.loadCustomers();
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }
+
 
   handleNameChange(event) {
     this.setState({ name: event.target.value });
@@ -52,7 +96,7 @@ export default class Customer extends Component {
 
   handleCreate() {
     const { name, address } = this.state;
-  
+
     // Make HTTP POST request to backend API to add new customer
     axios.post('https://localhost:7236/api/customers', {
       Name: name,
@@ -89,28 +133,42 @@ export default class Customer extends Component {
         </Button>
 
         {/* Table */}
+
         <table className="ui celled striped table">
           <thead className="custom-thead bold">
             <tr>
               <th>Name</th>
-              <th>Address</th>              
+              <th>Address</th>
+              <th>Actions</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
             {customers.map(customer => (
               <tr key={customer.id}>
                 <td data-label="Name">{customer.name}</td>
-                <td data-label="Address">{customer.address}</td>                
+                <td data-label="Address">{customer.address}</td>
+                <td>
+                  <button className="ui icon yellow button" onClick={() => this.handleEdit(customer.id)}>
+                    <i className="pencil alternate icon"></i> Edit
+                  </button>
+                </td>
+                <td>
+                  <button className="ui icon red button" onClick={() => this.handleDelete(customer.id)}>
+                    <i className="trash alternate icon"></i> Delete
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
 
+
         {/* Pagination */}
         {/* Replace totalPages with the actual total number of pages */}
         <Pagination activePage={1} onPageChange={() => { }} totalPages={5} />
 
-        {/* Modal */}
+        {/* Create Modal */}
         <Modal
           open={showModal}
           onClose={this.handleCancel}
@@ -141,6 +199,19 @@ export default class Customer extends Component {
             />
           </Modal.Actions>
         </Modal>
+
+        {/* Delete Modal */}
+        {this.state.isDeleteModalVisible && (
+          <div>
+            <div>Delete customer?</div>
+            <button onClick={this.handleConfirmDelete}>Confirm</button>
+            <button onClick={this.handleHideDeleteModal}>Cancel</button>
+          </div>
+        )}
+
+
+
+
       </div>
     );
   }
