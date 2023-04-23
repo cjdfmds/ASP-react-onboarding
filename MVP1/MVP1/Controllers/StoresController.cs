@@ -1,15 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using MVP1.Models;
 
 namespace MVP1.Controllers
 {
-    public class StoresController : Controller
+    [ApiController]
+    [Route("api/stores")]
+    public class StoresController : ControllerBase
     {
         private readonly MyStoreContext _context;
 
@@ -18,145 +18,87 @@ namespace MVP1.Controllers
             _context = context;
         }
 
-        // GET: Stores
-        public async Task<IActionResult> Index()
+        // GET: api/stores
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Store>>> GetStores()
         {
-              return _context.Stores != null ? 
-                          View(await _context.Stores.ToListAsync()) :
-                          Problem("Entity set 'MystoreContext.Stores'  is null.");
+            var stores = await _context.Stores.ToListAsync();
+            return Ok(stores);
         }
 
-        // GET: Stores/Details/5
-        public async Task<IActionResult> Details(int? id)
+        // GET: api/stores/5
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Store>> GetStore(int id)
         {
-            if (id == null || _context.Stores == null)
-            {
-                return NotFound();
-            }
-
-            var store = await _context.Stores
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (store == null)
-            {
-                return NotFound();
-            }
-
-            return View(store);
-        }
-
-        // GET: Stores/Create
-        public IActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: Stores/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,Address")] Store store)
-        {
-            if (ModelState.IsValid)
-            {
-                _context.Add(store);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(store);
-        }
-
-        // GET: Stores/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null || _context.Stores == null)
-            {
-                return NotFound();
-            }
-
             var store = await _context.Stores.FindAsync(id);
+
             if (store == null)
             {
                 return NotFound();
             }
-            return View(store);
+
+            return Ok(store);
         }
 
-        // POST: Stores/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Address")] Store store)
+        // PUT: api/stores/5
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutStore(int id, Store store)
         {
             if (id != store.Id)
             {
-                return NotFound();
+                return BadRequest();
             }
 
-            if (ModelState.IsValid)
+            _context.Entry(store).State = EntityState.Modified;
+
+            try
             {
-                try
-                {
-                    _context.Update(store);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!StoreExists(store.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
+                await _context.SaveChangesAsync();
             }
-            return View(store);
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!StoreExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return NoContent();
         }
 
-        // GET: Stores/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        // POST: api/stores
+        [HttpPost]
+        public async Task<ActionResult<Store>> PostStore(Store store)
         {
-            if (id == null || _context.Stores == null)
-            {
-                return NotFound();
-            }
+            _context.Stores.Add(store);
+            await _context.SaveChangesAsync();
 
-            var store = await _context.Stores
-                .FirstOrDefaultAsync(m => m.Id == id);
+            return CreatedAtAction(nameof(GetStore), new { id = store.Id }, store);
+        }
+
+        // DELETE: api/stores/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteStore(int id)
+        {
+            var store = await _context.Stores.FindAsync(id);
             if (store == null)
             {
                 return NotFound();
             }
 
-            return View(store);
-        }
-
-        // POST: Stores/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            if (_context.Stores == null)
-            {
-                return Problem("Entity set 'MystoreContext.Stores'  is null.");
-            }
-            var store = await _context.Stores.FindAsync(id);
-            if (store != null)
-            {
-                _context.Stores.Remove(store);
-            }
-            
+            _context.Stores.Remove(store);
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+
+            return NoContent();
         }
 
         private bool StoreExists(int id)
         {
-          return (_context.Stores?.Any(e => e.Id == id)).GetValueOrDefault();
+            return _context.Stores.Any(e => e.Id == id);
         }
     }
 }

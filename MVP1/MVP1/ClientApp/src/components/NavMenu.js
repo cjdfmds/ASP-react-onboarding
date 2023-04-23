@@ -32,7 +32,7 @@ export class NavMenu extends Component {
             <Menu.Item as={Link} to="/customers" name="customers" />
             <Menu.Item as={Link} to="/products" name="products" />
             <Menu.Item as={Link} to="/sales" name="sales" />
-            <Menu.Item as={Link} to="/store" name="stores" />
+            <Menu.Item as={Link} to="/stores" name="stores" />
             <Menu.Item as={Link} to="/fetch-data" name="fetch-data" />
           </Menu.Menu>
         </Menu>
