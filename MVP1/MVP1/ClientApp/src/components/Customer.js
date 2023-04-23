@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Pagination, Button, Modal, Form } from 'semantic-ui-react';
+import { Pagination, Button, Modal, Form, Icon, Header } from 'semantic-ui-react';
 import axios from 'axios';
 
 
@@ -12,6 +12,7 @@ export default class Customer extends Component {
       address: '',
       customers: [],
       isDeleteModalVisible: false,
+      isEditModalVisible: false,
       customerIdToDelete: null,
     };
     this.handleNameChange = this.handleNameChange.bind(this);
@@ -19,12 +20,19 @@ export default class Customer extends Component {
     this.handleCreate = this.handleCreate.bind(this);
     this.handleCancel = this.handleCancel.bind(this);
     this.loadCustomers = this.loadCustomers.bind(this);
-    this.handleEdit = this.handleEdit.bind(this);
 
+
+    //delete
     this.handleDelete = this.handleDelete.bind(this);
     this.handleShowDeleteModal = this.handleShowDeleteModal.bind(this);
     this.handleHideDeleteModal = this.handleHideDeleteModal.bind(this);
     this.handleConfirmDelete = this.handleConfirmDelete.bind(this);
+
+    //put/edit
+    this.handleHideEditModal = this.handleHideEditModal.bind(this);
+    this.handleEdit = this.handleEdit.bind(this);
+    this.handleSave = this.handleSave.bind(this);
+    
 
   }
 
@@ -49,10 +57,60 @@ export default class Customer extends Component {
       });
   }
 
-  handleEdit(customerId) {
-    // Navigate to edit customer page with the provided ID
-    this.props.history.push(`/edit/${customerId}`);
-  }
+  handleEdit = (customerId) => {
+    const customer = this.state.customers.find(
+      (customer) => customer.id === customerId
+    );
+    this.setState({
+      isEditModalVisible: true,
+      customerId: customerId,
+      name: customer.name,
+      address: customer.address,
+    });
+  };
+
+  handleSave = () => {
+    const { customerId, name, address } = this.state;
+    console.log(customerId, name, address)
+    const updatedCustomer = {
+      id: customerId,
+      name: name,
+      address: address,
+    };
+  
+    axios.put(`https://localhost:7236/api/customers/${customerId}`, updatedCustomer,{
+      headers: {
+        'Content-Type': 'application/json'}
+      })
+      .then((response) => {
+        const customers = this.state.customers.map((customer) => {
+          if (customer.id === customerId) {
+            console.log('testsuccess')
+            return {
+              
+              ...customer,
+              name: name,
+              address: address,
+            }; 
+          } else {console.log('testsuccess')
+            return customer;
+          }
+        });
+        console.log('testsuccess')
+        this.setState({
+         
+          customers: customers,
+          isEditModalVisible: false,
+          customerId: null,
+          name: "",
+          address: "",
+        });
+      })
+      .catch((error) => {
+        console.log('TEST FAILED')
+        console.log(error.response);
+      });
+  };
 
   handleDelete(customerId) {
     this.handleShowDeleteModal(customerId);
@@ -71,6 +129,11 @@ export default class Customer extends Component {
       customerIdToDelete: null,
     });
   }
+  
+  handleHideEditModal() {
+    this.setState({
+      isEditModalVisible: false,});     
+  }
 
   handleConfirmDelete() {
     const { customerIdToDelete } = this.state;
@@ -79,6 +142,7 @@ export default class Customer extends Component {
       .then((response) => {
         this.handleHideDeleteModal();
         this.loadCustomers();
+        console.log(`https://localhost:7236/api/customers/${customerIdToDelete}`.toString())
       })
       .catch((error) => {
         console.log(error);
@@ -120,8 +184,11 @@ export default class Customer extends Component {
     this.setState({ showModal: false });
   }
 
+
+
   render() {
-    const { showModal, name, address, customers } = this.state;
+    const { showModal, name, address, customers, isDeleteModalVisible, isEditModalVisible, currentCustomerId, customerIdToDelete } = this.state;
+    const currentCustomer = customers.find(c => c.id === currentCustomerId);
 
     return (
       <div>
@@ -133,7 +200,6 @@ export default class Customer extends Component {
         </Button>
 
         {/* Table */}
-
         <table className="ui celled striped table">
           <thead className="custom-thead bold">
             <tr>
@@ -141,6 +207,7 @@ export default class Customer extends Component {
               <th>Address</th>
               <th>Actions</th>
               <th>Actions</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
@@ -158,21 +225,40 @@ export default class Customer extends Component {
                     <i className="trash alternate icon"></i> Delete
                   </button>
                 </td>
+                <td></td>
               </tr>
             ))}
           </tbody>
         </table>
 
-
         {/* Pagination */}
         {/* Replace totalPages with the actual total number of pages */}
         <Pagination activePage={1} onPageChange={() => { }} totalPages={5} />
+
+        {/* Delete Modal */}
+        <Modal open={isDeleteModalVisible} onClose={this.handleHideDeleteModal} size='small' style={{
+          position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', maxWidth: '400px', width: '100%', maxHeight: '200px', height: '100%'
+        }}>
+          <Header icon='trash alternate' content='Delete customer?' />
+          <Modal.Content>
+            <p>Are you sure you want to delete this customer?</p>
+          </Modal.Content>
+          <Modal.Actions>
+            <Button color='red' onClick={() => this.handleConfirmDelete(customerIdToDelete)}>
+              <Icon name='trash alternate' /> Confirm
+            </Button>
+            <Button onClick={this.handleHideDeleteModal}>
+              <Icon name='remove' /> Cancel
+            </Button>
+          </Modal.Actions>
+        </Modal>
+
 
         {/* Create Modal */}
         <Modal
           open={showModal}
           onClose={this.handleCancel}
-          style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', maxWidth: '400px', width: '100%' }}>
+          style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', maxWidth: '400px', width: '100%', maxHeight: '350px', height: '200%' }}>
           <Modal.Header>Create a new customer</Modal.Header>
           <Modal.Content>
             <Form>
@@ -200,18 +286,52 @@ export default class Customer extends Component {
           </Modal.Actions>
         </Modal>
 
-        {/* Delete Modal */}
-        {this.state.isDeleteModalVisible && (
-          <div>
-            <div>Delete customer?</div>
-            <button onClick={this.handleConfirmDelete}>Confirm</button>
-            <button onClick={this.handleHideDeleteModal}>Cancel</button>
-          </div>
-        )}
-
-
-
-
+        {/* Edit Modal */}
+        <Modal 
+  open={isEditModalVisible} 
+  onClose={this.handleHideEditModal} 
+  size='small' 
+  style={{
+    position: 'absolute', 
+    top: '50%', 
+    left: '50%', 
+    transform: 'translate(-50%, -50%)', 
+    maxWidth: '400px', 
+    width: '100%', 
+    maxHeight: '300px', 
+    height: '100%'
+  }}
+>
+  <Modal.Header>Edit Customer</Modal.Header>
+  <Modal.Content>
+    <Form>
+      <Form.Field>
+        <label>Name</label>
+        <input 
+          type="text" 
+          value={this.state.name} 
+          onChange={(event) => this.setState({ name: event.target.value })}
+        />
+      </Form.Field>
+      <Form.Field>
+        <label>Address</label>
+        <input 
+          type="text" 
+          value={this.state.address} 
+          onChange={(event) => this.setState({ address: event.target.value })}
+        />
+      </Form.Field>
+    </Form>
+  </Modal.Content>
+  <Modal.Actions>
+    <Button color='green' onClick={this.handleSave}>
+      <Icon name='save' /> Save
+    </Button>
+    <Button onClick={this.handleHideEditModal}>
+      <Icon name='remove' /> Cancel
+    </Button>
+  </Modal.Actions>
+</Modal>
       </div>
     );
   }

@@ -18,7 +18,7 @@ namespace MVP1.Controllers
         public override void OnActionExecuting(ActionExecutingContext context)
         {
             //
-            context.HttpContext.Response.Headers.Add("Access-Control-Allow-Origin", "https://localhost:44465");
+            //context.HttpContext.Response.Headers.Add("Access-Control-Allow-Origin", "https://localhost:44465");
             base.OnActionExecuting(context);
         }
         private readonly MyStoreContext _context;
@@ -78,11 +78,11 @@ namespace MVP1.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Edit(int? id)
+        public async Task<IActionResult> Edit(int id, [FromBody] Customer updatedCustomer)
         {
-            if (id == null || _context.Customers == null)
+            if (id != updatedCustomer.Id)
             {
-                return NotFound();
+                return BadRequest();
             }
 
             var customer = await _context.Customers.FindAsync(id);
@@ -90,32 +90,51 @@ namespace MVP1.Controllers
             {
                 return NotFound();
             }
-            return View(customer);
+
+            customer.Name = updatedCustomer.Name;
+            customer.Address = updatedCustomer.Address;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+                return Ok(customer);
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!CustomerExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
         }
+
+
 
         // POST: Customers/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-           
-        // GET: Customers/Delete/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null || _context.Customers == null)
-            {
-                return NotFound();
-            }
 
-            var customer = await _context.Customers
-                .FirstOrDefaultAsync(m => m.Id == id);
+        // GET: Customers/Delete/5   
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var customer = await _context.Customers.FindAsync(id);
             if (customer == null)
             {
                 return NotFound();
             }
 
-            return View(customer);
+            _context.Customers.Remove(customer);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
         }
-                
+
+
         private bool CustomerExists(int id)
         {
           return (_context.Customers?.Any(e => e.Id == id)).GetValueOrDefault();
